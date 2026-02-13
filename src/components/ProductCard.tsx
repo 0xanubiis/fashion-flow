@@ -38,7 +38,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
             transition={{ duration: 0.4 }}
           />
           {product.discount && (
-            <span className="absolute top-3 left-3 bg-badge-sale text-badge-sale-foreground text-xs font-medium px-2.5 py-1 rounded-full">
+            <span className="absolute top-3 left-3 bg-yellow-500 text-badge-sale-foreground text-xs font-medium px-2.5 py-1 rounded-full">
               -{product.discount}%
             </span>
           )}

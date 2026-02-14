@@ -1,10 +1,12 @@
 import { useNewArrivalProducts } from "@/hooks/useProducts";
 import ProductCard from "@/components/ProductCard";
+import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-1.jpg";
 import { Link } from "react-router-dom";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
 export default function NewArrivalsPage() {
-  const { data: products = [], isLoading } = useNewArrivalProducts();
+  const { data: products = [], isLoading, error, refetch } = useNewArrivalProducts();
 
   return (
     <div>
@@ -36,6 +38,21 @@ export default function NewArrivalsPage() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className="bg-card rounded-xl aspect-[3/4] animate-pulse" />
             ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 sm:py-20">
+            <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
+              <AlertCircle className="w-12 h-12 text-destructive" />
+              <p className="text-muted-foreground">Unable to load new arrivals. Please try again.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => refetch()}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Try Again
+              </Button>
+            </div>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-12 sm:py-20">

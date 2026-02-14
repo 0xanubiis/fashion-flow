@@ -46,6 +46,8 @@ export function useProducts() {
       if (error) throw error;
       return (data as DbProduct[]).map(toProduct);
     },
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -61,6 +63,8 @@ export function useNewArrivalProducts() {
       if (error) throw error;
       return (data as DbProduct[]).map(toProduct);
     },
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -78,6 +82,8 @@ export function useProduct(id: string | undefined) {
       return data ? toProduct(data as DbProduct) : null;
     },
     enabled: !!id,
+    retry: 2,
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -92,5 +98,7 @@ export function useCategories() {
       if (error) throw error;
       return data.map((c) => c.name);
     },
+    retry: 2,
+    staleTime: 30 * 60 * 1000, // 30 minutes
   });
 }

@@ -64,3 +64,40 @@ SUPABASE RULES
 - Never trust client-side role checks.
 - Use server-side validation where possible.
 - Use typed Supabase client.
+
+UI / UX & DESIGN RULES
+- The UI must feel premium, modern, and minimalist.
+- Visual inspiration: luxury fashion brands (clean spacing, subtle motion, restrained colors).
+- Avoid loud colors, gradients, or gimmicks.
+- Prefer neutral palettes: off-white, charcoal, warm gray, muted earth tones.
+- Use strong typography hierarchy.
+- Generous whitespace is mandatory.
+
+ANIMATIONS & EFFECTS
+- Use subtle, high-quality animations only.
+- Prefer Framer Motion or CSS transitions.
+- Animations must feel smooth and intentional, never distracting.
+- Use:
+  - Fade + slight translate on entry
+  - Image hover zoom (very subtle)
+  - Button hover micro-interactions
+- Respect reduced-motion preferences.
+
+LAYOUT & COMPOSITION
+- Grid-based layouts only.
+- Consistent spacing system.
+- Cards must feel tactile and layered (soft shadows, depth).
+- Avoid sharp corners; use refined border radii.
+
+ECOMMERCE UX
+- Products must be scannable at a glance.
+- Price hierarchy must be clear.
+- Discount badges should feel premium, not cheap.
+- CTA buttons must feel confident, not aggressive.
+
+ABSOLUTE PROHIBITIONS
+- No flashy animations.
+- No heavy drop shadows.
+- No mismatched font sizes.
+- No “template-looking” UI.
+

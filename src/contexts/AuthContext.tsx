@@ -28,29 +28,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let mounted = true;
+    
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const u = session?.user ?? null;
+        
+        if (!mounted) return;
+        
+        setUser(u);
+        if (u) {
+          const admin = await checkAdmin(u.id);
+          if (mounted) {
+            setIsAdmin(admin);
+          }
+        } else {
+          if (mounted) {
+            setIsAdmin(false);
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (mounted) {
+          setUser(null);
+          setIsAdmin(false);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+      
       const u = session?.user ?? null;
       setUser(u);
+      
       if (u) {
         const admin = await checkAdmin(u.id);
-        setIsAdmin(admin);
+        if (mounted) {
+          setIsAdmin(admin);
+        }
       } else {
-        setIsAdmin(false);
+        if (mounted) {
+          setIsAdmin(false);
+        }
       }
-      setLoading(false);
     });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        const admin = await checkAdmin(u.id);
-        setIsAdmin(admin);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

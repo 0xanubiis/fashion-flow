@@ -8,6 +8,7 @@ import collection2 from "@/assets/collection-2.jpg";
 import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
 const heroSlides = [
   {
@@ -20,7 +21,7 @@ const heroSlides = [
 export default function HomePage() {
   const [slideIndex, setSlideIndex] = useState(0);
   const slide = heroSlides[slideIndex];
-  const { data: products = [], isLoading } = useProducts();
+  const { data: products = [], isLoading, error, refetch } = useProducts();
 
   return (
     <div>
@@ -160,6 +161,30 @@ export default function HomePage() {
               <div key={i} className="bg-card rounded-xl aspect-[3/4] animate-pulse" />
             ))}
           </div>
+        ) : error ? (
+          <div className="text-center py-12 sm:py-20">
+            <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
+              <AlertCircle className="w-12 h-12 text-destructive" />
+              <p className="text-muted-foreground">Unable to load products. Please try again.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => refetch()}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Try Again
+              </Button>
+            </div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12 sm:py-20">
+            <p className="text-muted-foreground mb-4">No products available at the moment.</p>
+            <Link to="/shop" className="touch-manipulation">
+              <Button variant="outline" size="lg" className="rounded-full px-6 sm:px-8">
+                Browse Shop
+              </Button>
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
             {products.slice(0, 6).map((product, i) => (
@@ -167,13 +192,15 @@ export default function HomePage() {
             ))}
           </div>
         )}
-        <div className="text-center mt-6 sm:mt-10">
-          <Link to="/shop" className="touch-manipulation">
-            <Button size="lg" className="rounded-full px-6 sm:px-8">
-              View All Products
-            </Button>
-          </Link>
-        </div>
+        {products.length > 0 && (
+          <div className="text-center mt-6 sm:mt-10">
+            <Link to="/shop" className="touch-manipulation">
+              <Button size="lg" className="rounded-full px-6 sm:px-8">
+                View All Products
+              </Button>
+            </Link>
+          </div>
+        )}
       </section>
     </div>
   );

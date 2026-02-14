@@ -11,8 +11,8 @@ import { toast } from "sonner";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
-  const { data: product, isLoading } = useProduct(id);
-  const { data: allProducts = [] } = useProducts();
+  const { data: product, isLoading, error } = useProduct(id);
+  const { data: allProducts = [], isLoading: isAllProductsLoading } = useProducts();
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState("");
   const [mainImageIdx, setMainImageIdx] = useState(0);
@@ -31,6 +31,17 @@ export default function ProductDetailsPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="container-page py-20 text-center">
+        <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
+          <p className="text-muted-foreground">Unable to load product details.</p>
+          <Link to="/shop" className="text-sm underline mt-4 inline-block">Back to shop</Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="container-page py-20 text-center">
@@ -41,7 +52,7 @@ export default function ProductDetailsPage() {
   }
 
   const discountedPrice = getDiscountedPrice(product.price, product.discount);
-  const related = allProducts.filter((p) => p.id !== product.id).slice(0, 3);
+  const related = isAllProductsLoading ? [] : allProducts.filter((p) => p.id !== product.id).slice(0, 3);
 
   const handleAddToCart = () => {
     if (!selectedSize) { toast.error("Please select a size"); return; }

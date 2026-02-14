@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail, Loader2 } from "lucide-react";
@@ -9,22 +9,28 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export default function AdminLogin() {
-  const { signIn } = useAuth();
+  const { signIn, user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Redirect to admin dashboard if already authenticated as admin
+  useEffect(() => {
+    if (!loading && user && isAdmin) {
+      navigate("/admin", { replace: true });
+    }
+  }, [user, isAdmin, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     const { error } = await signIn(email, password);
-    setLoading(false);
+    setSubmitting(false);
     if (error) {
       toast.error(error);
-    } else {
-      navigate("/admin");
     }
+    // Note: Navigation will be handled by the useEffect above when auth state updates
   };
 
   return (
@@ -69,8 +75,8 @@ export default function AdminLogin() {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</> : "Sign In"}
+            <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+              {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</> : "Sign In"}
             </Button>
           </form>
         </div>

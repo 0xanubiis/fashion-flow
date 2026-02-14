@@ -5,11 +5,12 @@ import { brands, formatPrice } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-1.jpg";
-import { Filter, X } from "lucide-react";
+import { Filter, X, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function ShopPage() {
-  const { data: products = [], isLoading } = useProducts();
+  const { data: products = [], isLoading, error, refetch } = useProducts();
   const { data: categories = [] } = useCategories();
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -127,8 +128,39 @@ export default function ShopPage() {
                   <div key={i} className="bg-card rounded-xl aspect-[3/4] animate-pulse" />
                 ))}
               </div>
+            ) : error ? (
+              <div className="text-center py-12 sm:py-20">
+                <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
+                  <AlertCircle className="w-12 h-12 text-destructive" />
+                  <p className="text-muted-foreground">Unable to load products. Please try again.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => refetch()}
+                    className="gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Try Again
+                  </Button>
+                </div>
+              </div>
             ) : filtered.length === 0 ? (
-              <p className="text-center text-muted-foreground py-12 sm:py-20">No products match your filters.</p>
+              <div className="text-center py-12 sm:py-20">
+                <p className="text-muted-foreground mb-4">
+                  {products.length === 0 ? "No products available at the moment." : "No products match your filters."}
+                </p>
+                {products.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSelectedBrands([]);
+                      setSelectedCategories([]);
+                      setPriceRange([0, 600000]);
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
                 {filtered.map((p, i) => (

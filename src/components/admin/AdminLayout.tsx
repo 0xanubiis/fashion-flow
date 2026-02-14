@@ -25,6 +25,7 @@ const navItems = [
 export default function AdminLayout() {
   const { user, isAdmin, loading, signOut } = useAuth();
 
+  // Show loading state while auth is being initialized
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -33,6 +34,7 @@ export default function AdminLayout() {
     );
   }
 
+  // Redirect to login if not authenticated or not admin
   if (!user || !isAdmin) {
     return <Navigate to="/admin/login" replace />;
   }

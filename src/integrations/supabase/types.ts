@@ -159,6 +159,7 @@ export type Database = {
           id: string
           image_url: string | null
           images: string[] | null
+          is_new_arrival: boolean
           name: string
           price: number
           rating: number | null
@@ -175,6 +176,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          is_new_arrival?: boolean
           name: string
           price: number
           rating?: number | null
@@ -191,6 +193,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          is_new_arrival?: boolean
           name?: string
           price?: number
           rating?: number | null

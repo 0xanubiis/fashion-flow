@@ -15,6 +15,7 @@ export interface DbProduct {
   sizes: string[] | null;
   rating: number | null;
   review_count: number | null;
+  is_new_arrival: boolean;
 }
 
 function toProduct(db: DbProduct): Product {
@@ -41,6 +42,21 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as DbProduct[]).map(toProduct);
+    },
+  });
+}
+
+export function useNewArrivalProducts() {
+  return useQuery({
+    queryKey: ["products", "new-arrivals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_new_arrival", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data as DbProduct[]).map(toProduct);

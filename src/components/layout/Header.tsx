@@ -5,8 +5,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navCategories = [
-{ label: "New Arrivals", href: "/shop" },
-{ label: "Collection", href: "/shop" }];
+  { label: "New Arrivals", href: "/new-arrivals" },
+  { label: "Collection", href: "/shop" },
+];
 
 
 const navLinks = [

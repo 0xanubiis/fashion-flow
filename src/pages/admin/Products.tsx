@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Loader2, Upload, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,18 @@ interface ProductForm {
   price: string;
   discount: string;
   image: File | null;
+  isNewArrival: boolean;
+}
+
+interface ProductRow {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  price: number;
+  discount: number | null;
+  image_url: string | null;
+  is_new_arrival: boolean;
 }
 
 export default function AdminProducts() {
@@ -38,7 +51,7 @@ export default function AdminProducts() {
   const { data: products = [], isLoading } = useAdminProducts();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<ProductForm>({
-    name: "", description: "", category: "", price: "", discount: "", image: null,
+    name: "", description: "", category: "", price: "", discount: "", image: null, isNewArrival: false,
   });
 
   const deleteMutation = useMutation({
@@ -51,7 +64,7 @@ export default function AdminProducts() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product deleted");
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to delete"),
   });
 
   const createMutation = useMutation({
@@ -76,6 +89,7 @@ export default function AdminProducts() {
         discount: parseInt(f.discount) || 0,
         image_url: imageUrl,
         images: [imageUrl],
+        is_new_arrival: f.isNewArrival,
       });
       if (error) throw error;
     },
@@ -83,10 +97,26 @@ export default function AdminProducts() {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setShowModal(false);
-      setForm({ name: "", description: "", category: "", price: "", discount: "", image: null });
+      setForm({ name: "", description: "", category: "", price: "", discount: "", image: null, isNewArrival: false });
       toast.success("Product added");
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to add product"),
+  });
+
+  const toggleNewArrivalMutation = useMutation({
+    mutationFn: async ({ id, isNewArrival }: { id: string; isNewArrival: boolean }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ is_new_arrival: isNewArrival })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product updated");
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to update"),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -118,11 +148,12 @@ export default function AdminProducts() {
                 <th className="p-3 font-medium text-muted-foreground">Category</th>
                 <th className="p-3 font-medium text-muted-foreground">Price</th>
                 <th className="p-3 font-medium text-muted-foreground">Discount</th>
+                <th className="p-3 font-medium text-muted-foreground">New arrival</th>
                 <th className="p-3 font-medium text-muted-foreground w-12"></th>
               </tr>
             </thead>
             <tbody>
-              {products.map((p: any) => (
+              {products.map((p: ProductRow) => (
                 <tr key={p.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                   <td className="p-3">
                     <img src={p.image_url || "/placeholder.svg"} alt={p.name} className="w-10 h-10 rounded-lg object-cover" />
@@ -132,10 +163,21 @@ export default function AdminProducts() {
                   <td className="p-3">{formatPrice(p.price)}</td>
                   <td className="p-3">{p.discount ? `${p.discount}%` : "–"}</td>
                   <td className="p-3">
+                    <Switch
+                      checked={p.is_new_arrival ?? false}
+                      onCheckedChange={(checked) =>
+                        toggleNewArrivalMutation.mutate({ id: p.id, isNewArrival: !!checked })
+                      }
+                      disabled={toggleNewArrivalMutation.isPending}
+                      aria-label={`Mark ${p.name} as new arrival`}
+                    />
+                  </td>
+                  <td className="p-3">
                     <button
                       onClick={() => deleteMutation.mutate(p.id)}
                       className="text-muted-foreground hover:text-destructive transition-colors p-1"
                       disabled={deleteMutation.isPending}
+                      aria-label={`Delete ${p.name}`}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -200,6 +242,17 @@ export default function AdminProducts() {
                     </span>
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => setForm({ ...form, image: e.target.files?.[0] || null })} />
                   </label>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                  <div>
+                    <Label>Show on New Arrivals</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">Feature this product on the New Arrivals page</p>
+                  </div>
+                  <Switch
+                    checked={form.isNewArrival}
+                    onCheckedChange={(checked) => setForm({ ...form, isNewArrival: !!checked })}
+                    aria-label="Show on New Arrivals page"
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={createMutation.isPending}>
                   {createMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</> : "Add Product"}
